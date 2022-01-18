@@ -1,4 +1,4 @@
-class ProfileViewer {
+export class ProfileViewer {
     data;
     currentThread;
     threads = [];
