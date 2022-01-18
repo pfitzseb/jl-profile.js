@@ -7,13 +7,12 @@ export class ProfileViewer {
         this.canWheelDown = true;
         this.scrollPosition = 0;
         this.isResizing = false;
-        this.isScrolling = false;
+        this.isDocumentScrolling = false;
         this.isMouseMove = false;
         this.scale = window.devicePixelRatio;
         this.borderWidth = 2;
         this.padding = 5;
         this.fontConfig = '10px sans-serif';
-        this.fontColor = '#fff';
         this.borderColor = '#fff';
         this.boxHeight = 24;
         this.destroyed = false;
@@ -84,12 +83,24 @@ export class ProfileViewer {
         this.updateFilter();
         this.redraw();
     }
+    registerCtrlClickHandler(f) {
+        this.ctrlClickHandler = f;
+    }
+    registerThreadSelectorHandler(f) {
+        this.threadSelectorHandler = f;
+    }
+    registerScrollListener() {
+        document.addEventListener('scroll', this.scrollHandler);
+    }
     clear() {
         this.threads = [];
         this.currentThread = '';
         this.activeNode = undefined;
         this.canvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.hoverCanvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    }
+    isDestroyed() {
+        return this.destroyed;
     }
     getStyles() {
         var _a, _b, _c;
@@ -370,21 +381,18 @@ export class ProfileViewer {
         this.resizeObserver.observe(this.container);
     }
     scrollHandler(e) {
-        if (!this.isScrolling) {
+        if (!this.isDocumentScrolling) {
             window.requestAnimationFrame(() => {
                 this.getOffset();
-                this.isScrolling = false;
+                this.isDocumentScrolling = false;
             });
-            this.isScrolling = true;
+            this.isDocumentScrolling = true;
         }
     }
     getOffset() {
         const box = this.canvas.getBoundingClientRect();
         this.offsetX = box.left;
         this.offsetY = box.top;
-    }
-    registerScrollListener() {
-        document.addEventListener('scroll', this.scrollHandler);
     }
     // hash of function named, used to seed PRNG
     nodeHash(node) {
@@ -589,12 +597,6 @@ export class ProfileViewer {
             found = true;
         });
         return found;
-    }
-    registerCtrlClickHandler(f) {
-        this.ctrlClickHandler = f;
-    }
-    registerThreadSelectorHandler(f) {
-        this.threadSelectorHandler = f;
     }
 }
 //# sourceMappingURL=profile-viewer.js.map

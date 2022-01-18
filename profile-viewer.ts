@@ -23,56 +23,54 @@ interface TooltipElementContainer {
 }
 
 export class ProfileViewer {
-  data: Record<string, ProfileNode>
-  currentThread: string
-  threads: string[] = []
-  activeNode: ProfileNode
+  private data: Record<string, ProfileNode>
+  private currentThread: string
+  private threads: string[] = []
+  private activeNode: ProfileNode
 
-  container: Element
+  private container: Element
 
-  canvas: HTMLCanvasElement
-  canvasCtx: CanvasRenderingContext2D
-  canvasHeight: number
-  canvasWidth: number
-  canvasHeightCSS: number
-  canvasWidthCSS: number
-  hoverCanvas: HTMLCanvasElement
-  hoverCanvasCtx: CanvasRenderingContext2D
-  filterContainer: HTMLElement
-  filterInput: HTMLSelectElement
-  tooltipElement: HTMLElement
-  tooltip: TooltipElementContainer
+  private canvas: HTMLCanvasElement
+  private canvasCtx: CanvasRenderingContext2D
+  private canvasHeight: number
+  private canvasWidth: number
+  private canvasHeightCSS: number
+  private canvasWidthCSS: number
+  private hoverCanvas: HTMLCanvasElement
+  private hoverCanvasCtx: CanvasRenderingContext2D
+  private filterContainer: HTMLElement
+  private filterInput: HTMLSelectElement
+  private tooltipElement: HTMLElement
+  private tooltip: TooltipElementContainer
 
-  stylesheet: HTMLElement
+  private stylesheet: HTMLElement
 
-  offsetX: number = 0
-  offsetY: number = 0
+  private offsetX: number = 0
+  private offsetY: number = 0
 
-  isWheeling = false
-  canWheelDown = true
-  scrollPosition = 0
+  private isWheeling = false
+  private canWheelDown = true
+  private scrollPosition = 0
 
-  resizeObserver: ResizeObserver
-  isResizing = false
+  private resizeObserver: ResizeObserver
+  private isResizing = false
 
-  scrollListener: EventListener
-  isScrolling = false
+  private isDocumentScrolling = false
 
-  isMouseMove = false
+  private isMouseMove = false
 
-  scale = window.devicePixelRatio
-  borderWidth = 2
-  padding = 5
-  fontConfig = '10px sans-serif'
-  fontColor = '#fff'
-  borderColor = '#fff'
+  private scale = window.devicePixelRatio
+  private borderWidth = 2
+  private padding = 5
+  private fontConfig = '10px sans-serif'
+  private borderColor = '#fff'
 
-  boxHeight = 24
+  private boxHeight = 24
 
-  ctrlClickHandler: (node: ProfileNode) => void
-  threadSelectorHandler: (thread: string) => void
+  private ctrlClickHandler: (node: ProfileNode) => void
+  private threadSelectorHandler: (thread: string) => void
 
-  destroyed = false
+  private destroyed = false
 
   constructor(element: string | Element, data: Record<string, ProfileNode>) {
     if (typeof element === 'string') {
@@ -157,6 +155,18 @@ export class ProfileViewer {
     this.redraw()
   }
 
+  registerCtrlClickHandler(f: ((node: ProfileNode) => void) | undefined) {
+    this.ctrlClickHandler = f
+  }
+
+  registerThreadSelectorHandler(f: ((thread: string) => void) | undefined) {
+    this.threadSelectorHandler = f
+  }
+
+  registerScrollListener() {
+    document.addEventListener('scroll', this.scrollHandler)
+  }
+
   clear() {
     this.threads = []
     this.currentThread = ''
@@ -166,7 +176,11 @@ export class ProfileViewer {
     this.hoverCanvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
   }
 
-  getStyles() {
+  isDestroyed() {
+    return this.destroyed
+  }
+
+  private getStyles() {
     const style = window.getComputedStyle(this.container, null)
     const fontFamily = style.fontFamily
     const fontSize = style.fontSize
@@ -199,7 +213,7 @@ export class ProfileViewer {
     }
   }
 
-  redraw() {
+  private redraw() {
     this.canWheelDown = false
     this.canvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
     this.clearHover()
@@ -212,7 +226,7 @@ export class ProfileViewer {
     )
   }
 
-  insertDOM() {
+  private insertDOM() {
     this.insertStylesheet()
 
     this.canvas = document.createElement('canvas')
@@ -331,13 +345,13 @@ export class ProfileViewer {
     })
   }
 
-  resetView() {
+  private resetView() {
     this.activeNode = this.data[this.currentThread]
     this.scrollPosition = 0
     this.redraw()
   }
 
-  insertStylesheet() {
+  private insertStylesheet() {
     const stylesheet: HTMLElement = document.querySelector(
       '#__profiler_stylesheet'
     )
@@ -395,7 +409,7 @@ export class ProfileViewer {
     }
   }
 
-  createTooltip() {
+  private createTooltip() {
     this.tooltipElement = document.createElement('div')
     this.tooltipElement.classList.add('__profiler-tooltip')
 
@@ -437,7 +451,7 @@ export class ProfileViewer {
     return this.tooltipElement
   }
 
-  createFilterContainer() {
+  private createFilterContainer() {
     this.filterContainer = document.createElement('div')
     this.filterContainer.classList.add('__profiler-filter')
 
@@ -469,7 +483,7 @@ export class ProfileViewer {
     return this.filterContainer
   }
 
-  updateFilter() {
+  private updateFilter() {
     while (this.filterInput.firstChild) {
       this.filterInput.removeChild(this.filterInput.lastChild)
     }
@@ -482,7 +496,7 @@ export class ProfileViewer {
     }
   }
 
-  registerResizeObserver() {
+  private registerResizeObserver() {
     this.resizeObserver = new ResizeObserver((entries) => {
       if (!this.isResizing) {
         for (const entry of entries) {
@@ -519,29 +533,25 @@ export class ProfileViewer {
     this.resizeObserver.observe(this.container)
   }
 
-  scrollHandler(e) {
-    if (!this.isScrolling) {
+  private scrollHandler(e) {
+    if (!this.isDocumentScrolling) {
       window.requestAnimationFrame(() => {
         this.getOffset()
-        this.isScrolling = false
+        this.isDocumentScrolling = false
       })
 
-      this.isScrolling = true
+      this.isDocumentScrolling = true
     }
   }
 
-  getOffset() {
+  private getOffset() {
     const box = this.canvas.getBoundingClientRect()
     this.offsetX = box.left
     this.offsetY = box.top
   }
 
-  registerScrollListener() {
-    document.addEventListener('scroll', this.scrollHandler)
-  }
-
   // hash of function named, used to seed PRNG
-  nodeHash(node: ProfileNode) {
+  private nodeHash(node: ProfileNode) {
     const hashString = node.file + node.line
     let hash = 0
     for (let i = 0; i < hashString.length; i++) {
@@ -554,7 +564,7 @@ export class ProfileViewer {
   }
 
   // Simple PRNG from https://stackoverflow.com/a/47593316/12113178
-  mulberry32(a: number) {
+  private mulberry32(a: number) {
     return function () {
       let t = (a += 0x6d2b79f5)
       t = Math.imul(t ^ (t >>> 15), t | 1)
@@ -565,7 +575,7 @@ export class ProfileViewer {
 
   // modifies the normal color by three stable random values drawn from a
   // PRNG seeded by the node hash
-  modifyNodeColorByHash(
+  private modifyNodeColorByHash(
     r: number,
     g: number,
     b: number,
@@ -589,7 +599,7 @@ export class ProfileViewer {
     }
   }
 
-  nodeColors(node: ProfileNode, hash: number) {
+  private nodeColors(node: ProfileNode, hash: number) {
     let r: number, g: number, b: number
     let a = 1
     if (node.flags & 0x01) {
@@ -616,7 +626,7 @@ export class ProfileViewer {
     }
   }
 
-  drawGraph(
+  private drawGraph(
     node: ProfileNode,
     width: number,
     height: number,
@@ -653,7 +663,7 @@ export class ProfileViewer {
     }
   }
 
-  drawNode(
+  private drawNode(
     text: string,
     color: string,
     bColor: string,
@@ -709,7 +719,7 @@ export class ProfileViewer {
     }
   }
 
-  updateTooltip(node: ProfileNode) {
+  private updateTooltip(node: ProfileNode) {
     this.tooltip.function.innerText = node.func
     this.tooltip.file.innerText = node.file + ':' + node.line
     this.tooltip.count.innerText = node.count.toString()
@@ -743,7 +753,7 @@ export class ProfileViewer {
     }
   }
 
-  drawHoverNode(node: ProfileNode) {
+  private drawHoverNode(node: ProfileNode) {
     this.hoverCanvasCtx.fillStyle = this.borderColor
     this.hoverCanvasCtx.fillRect(
       node.pos.x,
@@ -764,12 +774,12 @@ export class ProfileViewer {
     this.updateTooltip(node)
   }
 
-  clearHover() {
+  private clearHover() {
     this.hoverCanvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
     this.tooltipElement.style.display = 'none'
   }
 
-  drawHover(node: ProfileNode, mouseX: number, mouseY: number) {
+  private drawHover(node: ProfileNode, mouseX: number, mouseY: number) {
     let found = false
     this.runOnNodeAtMousePosition(node, mouseX, mouseY, (node: ProfileNode) => {
       this.drawHoverNode(node)
@@ -779,7 +789,7 @@ export class ProfileViewer {
     return found
   }
 
-  runOnNodeAtMousePosition(
+  private runOnNodeAtMousePosition(
     root: ProfileNode,
     x: number,
     y: number,
@@ -804,7 +814,7 @@ export class ProfileViewer {
     return false
   }
 
-  zoomInOnNode(node: ProfileNode, mouseX: number, mouseY: number) {
+  private zoomInOnNode(node: ProfileNode, mouseX: number, mouseY: number) {
     let found = false
     this.runOnNodeAtMousePosition(node, mouseX, mouseY, (node) => {
       this.clearHover()
@@ -813,13 +823,5 @@ export class ProfileViewer {
     })
 
     return found
-  }
-
-  registerCtrlClickHandler(f: ((node: ProfileNode) => void) | undefined) {
-    this.ctrlClickHandler = f
-  }
-
-  registerThreadSelectorHandler(f: ((thread: string) => void) | undefined) {
-    this.threadSelectorHandler = f
   }
 }

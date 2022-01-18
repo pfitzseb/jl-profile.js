@@ -4,7 +4,8 @@
   "description": "Canvas-based flamegraph viewer for Julia code",
   "main": "dist/profile-viewer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc -p ./"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,10 @@
   },
   "homepage": "https://github.com/pfitzseb/jl-profile.js#readme",
   "devDependencies": {
+    "pre-commit": "^1.2.2",
     "typescript": "^4.5.4"
-  }
+  },
+  "pre-commit": [
+    "compile"
+  ]
 }
