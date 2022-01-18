@@ -117,6 +117,7 @@ export class ProfileViewer {
         const textMetrics = this.canvasCtx.measureText('ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]*\'"^_`abcdefghijklmnopqrstuvwxyz');
         this.boxHeight = Math.max(20, Math.ceil((((_b = textMetrics.fontBoundingBoxDescent) !== null && _b !== void 0 ? _b : textMetrics.actualBoundingBoxDescent) +
             ((_c = textMetrics.fontBoundingBoxAscent) !== null && _c !== void 0 ? _c : textMetrics.actualBoundingBoxAscent) +
+            2 * this.borderWidth +
             2 * this.padding) *
             this.scale));
         if (this.activeNode) {
@@ -497,7 +498,7 @@ export class ProfileViewer {
         if (width < 1) {
             width = 1;
         }
-        const drawBorder = false; //width > 20*this.borderWidth;
+        const drawBorder = false;
         this.canvasCtx.fillStyle = color;
         this.canvasCtx.beginPath();
         this.canvasCtx.rect(x, y + this.borderWidth, width, this.boxHeight - this.borderWidth);
@@ -518,7 +519,7 @@ export class ProfileViewer {
             this.canvasCtx.closePath();
             this.canvasCtx.clip();
             this.canvasCtx.fillStyle = textColor;
-            this.canvasCtx.fillText(text, x + this.padding, y + this.boxHeight / 2);
+            this.canvasCtx.fillText(text, x + this.padding, y + this.boxHeight / 2 + this.borderWidth);
             this.canvasCtx.restore();
         }
     }

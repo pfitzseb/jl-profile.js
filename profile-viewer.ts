@@ -204,6 +204,7 @@ export class ProfileViewer {
           textMetrics.actualBoundingBoxDescent) +
           (textMetrics.fontBoundingBoxAscent ??
             textMetrics.actualBoundingBoxAscent) +
+          2 * this.borderWidth +
           2 * this.padding) *
           this.scale
       )
@@ -714,7 +715,7 @@ export class ProfileViewer {
       this.canvasCtx.closePath()
       this.canvasCtx.clip()
       this.canvasCtx.fillStyle = textColor
-      this.canvasCtx.fillText(text, x + this.padding, y + this.boxHeight / 2)
+      this.canvasCtx.fillText(text, x + this.padding, y + this.boxHeight / 2 + this.borderWidth)
       this.canvasCtx.restore()
     }
   }
