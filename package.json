@@ -1,8 +1,8 @@
 {
   "name": "jl-profile",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Canvas-based flamegraph viewer for Julia code",
-  "main": "index.js",
+  "main": "dist/profile-viewer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/pfitzseb/jl-profile.js/issues"
   },
-  "homepage": "https://github.com/pfitzseb/jl-profile.js#readme"
+  "homepage": "https://github.com/pfitzseb/jl-profile.js#readme",
+  "devDependencies": {
+    "typescript": "^4.5.4"
+  }
 }
