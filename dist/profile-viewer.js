@@ -220,7 +220,7 @@ export class ProfileViewer {
                     this.scrollPosition = 0;
                     this.redraw();
                 }
-                else {
+                else if (ev.detail === 2) {
                     this.resetView();
                 }
             }
@@ -498,7 +498,7 @@ export class ProfileViewer {
         if (width < 1) {
             width = 1;
         }
-        const drawBorder = false;
+        const drawBorder = false; //width > 20*this.borderWidth;
         this.canvasCtx.fillStyle = color;
         this.canvasCtx.beginPath();
         this.canvasCtx.rect(x, y + this.borderWidth, width, this.boxHeight - this.borderWidth);

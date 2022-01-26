@@ -339,7 +339,7 @@ export class ProfileViewer {
         if (this.zoomInOnNode(this.activeNode, mouseX, mouseY)) {
           this.scrollPosition = 0
           this.redraw()
-        } else {
+        } else if (ev.detail === 2) {
           this.resetView()
         }
       }
