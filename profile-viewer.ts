@@ -61,7 +61,7 @@ export class ProfileViewer {
 
   private scale = window.devicePixelRatio
   private borderWidth = 2
-  private padding = 5
+  private padding = 2
   private fontConfig = '10px sans-serif'
   private borderColor = '#fff'
 
@@ -197,17 +197,14 @@ export class ProfileViewer {
     const textMetrics = this.canvasCtx.measureText(
       'ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]*\'"^_`abcdefghijklmnopqrstuvwxyz'
     )
-    this.boxHeight = Math.max(
-      20,
-      Math.ceil(
-        ((textMetrics.fontBoundingBoxDescent ??
-          textMetrics.actualBoundingBoxDescent) +
-          (textMetrics.fontBoundingBoxAscent ??
-            textMetrics.actualBoundingBoxAscent) +
-          2 * this.borderWidth +
-          2 * this.padding) *
-          this.scale
-      )
+    this.boxHeight = Math.ceil(
+      ((textMetrics.fontBoundingBoxDescent ??
+        textMetrics.actualBoundingBoxDescent) +
+        (textMetrics.fontBoundingBoxAscent ??
+          textMetrics.actualBoundingBoxAscent) +
+        2 * this.borderWidth +
+        2 * this.padding) *
+        this.scale
     )
     if (this.activeNode) {
       this.redraw()
@@ -237,10 +234,14 @@ export class ProfileViewer {
     this.hoverCanvas.classList.add('__profiler-hover-canvas')
     this.hoverCanvasCtx = this.hoverCanvas.getContext('2d')
 
+    const canvasContainer = document.createElement('div')
+    canvasContainer.classList.add('__profiler-canvas-container')
+    canvasContainer.appendChild(this.canvas)
+    canvasContainer.appendChild(this.hoverCanvas)
+    canvasContainer.appendChild(this.createTooltip())
+
     this.container.appendChild(this.createFilterContainer())
-    this.container.appendChild(this.canvas)
-    this.container.appendChild(this.hoverCanvas)
-    this.container.appendChild(this.createTooltip())
+    this.container.appendChild(canvasContainer)
 
     this.canvas.addEventListener('wheel', (ev) => {
       if (!this.activeNode) {
@@ -303,7 +304,7 @@ export class ProfileViewer {
               this.tooltipElement.style.top = 'unset'
             } else {
               this.tooltipElement.style.bottom = 'unset'
-              this.tooltipElement.style.top = mouseY + 40 + 'px'
+              this.tooltipElement.style.top = mouseY + 10 + 'px'
             }
             this.tooltipElement.style.display = 'block'
           } else {
@@ -370,6 +371,11 @@ export class ProfileViewer {
                     z-index: 0;
                     position: absolute;
                     width: 100%;
+                }
+                .__profiler-canvas-container {
+                  width: 100%;
+                  height: 100%;
+                  position: relative;
                 }
                 .__profiler-hover-canvas {
                     z-index: 1;
@@ -701,13 +707,13 @@ export class ProfileViewer {
       this.canvasCtx.fill()
     }
 
-    const textWidth = width - 2 * this.padding
+    const textWidth = width - 2 * this.padding - 2 * this.borderWidth
 
     if (textWidth > 10) {
       this.canvasCtx.save()
       this.canvasCtx.beginPath()
       this.canvasCtx.rect(
-        x + this.padding,
+        x + this.borderWidth + this.padding,
         y + this.borderWidth + this.padding,
         textWidth,
         this.boxHeight - this.borderWidth - 2 * this.padding
@@ -715,7 +721,11 @@ export class ProfileViewer {
       this.canvasCtx.closePath()
       this.canvasCtx.clip()
       this.canvasCtx.fillStyle = textColor
-      this.canvasCtx.fillText(text, x + this.padding, y + this.boxHeight / 2 + this.borderWidth)
+      this.canvasCtx.fillText(
+        text,
+        x + this.borderWidth + this.padding,
+        y + this.boxHeight / 2 + this.borderWidth
+      )
       this.canvasCtx.restore()
     }
   }

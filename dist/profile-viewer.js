@@ -11,7 +11,7 @@ export class ProfileViewer {
         this.isMouseMove = false;
         this.scale = window.devicePixelRatio;
         this.borderWidth = 2;
-        this.padding = 5;
+        this.padding = 2;
         this.fontConfig = '10px sans-serif';
         this.borderColor = '#fff';
         this.boxHeight = 24;
@@ -115,11 +115,11 @@ export class ProfileViewer {
         this.canvasCtx.font = this.fontConfig;
         this.canvasCtx.textBaseline = 'middle';
         const textMetrics = this.canvasCtx.measureText('ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]*\'"^_`abcdefghijklmnopqrstuvwxyz');
-        this.boxHeight = Math.max(20, Math.ceil((((_b = textMetrics.fontBoundingBoxDescent) !== null && _b !== void 0 ? _b : textMetrics.actualBoundingBoxDescent) +
+        this.boxHeight = Math.ceil((((_b = textMetrics.fontBoundingBoxDescent) !== null && _b !== void 0 ? _b : textMetrics.actualBoundingBoxDescent) +
             ((_c = textMetrics.fontBoundingBoxAscent) !== null && _c !== void 0 ? _c : textMetrics.actualBoundingBoxAscent) +
             2 * this.borderWidth +
             2 * this.padding) *
-            this.scale));
+            this.scale);
         if (this.activeNode) {
             this.redraw();
         }
@@ -138,10 +138,13 @@ export class ProfileViewer {
         this.hoverCanvas = document.createElement('canvas');
         this.hoverCanvas.classList.add('__profiler-hover-canvas');
         this.hoverCanvasCtx = this.hoverCanvas.getContext('2d');
+        const canvasContainer = document.createElement('div');
+        canvasContainer.classList.add('__profiler-canvas-container');
+        canvasContainer.appendChild(this.canvas);
+        canvasContainer.appendChild(this.hoverCanvas);
+        canvasContainer.appendChild(this.createTooltip());
         this.container.appendChild(this.createFilterContainer());
-        this.container.appendChild(this.canvas);
-        this.container.appendChild(this.hoverCanvas);
-        this.container.appendChild(this.createTooltip());
+        this.container.appendChild(canvasContainer);
         this.canvas.addEventListener('wheel', (ev) => {
             if (!this.activeNode) {
                 return;
@@ -189,7 +192,7 @@ export class ProfileViewer {
                         }
                         else {
                             this.tooltipElement.style.bottom = 'unset';
-                            this.tooltipElement.style.top = mouseY + 40 + 'px';
+                            this.tooltipElement.style.top = mouseY + 10 + 'px';
                         }
                         this.tooltipElement.style.display = 'block';
                     }
@@ -246,6 +249,11 @@ export class ProfileViewer {
                     z-index: 0;
                     position: absolute;
                     width: 100%;
+                }
+                .__profiler-canvas-container {
+                  width: 100%;
+                  height: 100%;
+                  position: relative;
                 }
                 .__profiler-hover-canvas {
                     z-index: 1;
@@ -511,15 +519,15 @@ export class ProfileViewer {
             this.canvasCtx.closePath();
             this.canvasCtx.fill();
         }
-        const textWidth = width - 2 * this.padding;
+        const textWidth = width - 2 * this.padding - 2 * this.borderWidth;
         if (textWidth > 10) {
             this.canvasCtx.save();
             this.canvasCtx.beginPath();
-            this.canvasCtx.rect(x + this.padding, y + this.borderWidth + this.padding, textWidth, this.boxHeight - this.borderWidth - 2 * this.padding);
+            this.canvasCtx.rect(x + this.borderWidth + this.padding, y + this.borderWidth + this.padding, textWidth, this.boxHeight - this.borderWidth - 2 * this.padding);
             this.canvasCtx.closePath();
             this.canvasCtx.clip();
             this.canvasCtx.fillStyle = textColor;
-            this.canvasCtx.fillText(text, x + this.padding, y + this.boxHeight / 2 + this.borderWidth);
+            this.canvasCtx.fillText(text, x + this.borderWidth + this.padding, y + this.boxHeight / 2 + this.borderWidth);
             this.canvasCtx.restore();
         }
     }
