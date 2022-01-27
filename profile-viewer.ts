@@ -320,6 +320,10 @@ export class ProfileViewer {
       if (!this.activeNode) {
         return
       }
+
+      ev.preventDefault()
+      ev.stopPropagation()
+
       this.getOffset()
 
       const mouseX = this.scale * (ev.clientX - this.offsetX)
@@ -341,6 +345,7 @@ export class ProfileViewer {
           this.scrollPosition = 0
           this.redraw()
         } else if (ev.detail === 2) {
+          // reset on double-click
           this.resetView()
         }
       }
@@ -406,6 +411,7 @@ export class ProfileViewer {
                     margin: 0;
                     box-sizing: border-box;
                     border-bottom: 1px solid #444;
+                    user-select: none;
                 }
                 .__profiler-reset {
                     float: right;
