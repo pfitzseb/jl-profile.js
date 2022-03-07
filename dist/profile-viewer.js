@@ -213,7 +213,7 @@ export class ProfileViewer {
             this.getOffset();
             const mouseX = this.scale * (ev.clientX - this.offsetX);
             const mouseY = this.scale * (ev.clientY - this.offsetY);
-            if (ev.ctrlKey) {
+            if (ev.ctrlKey || ev.metaKey) {
                 this.runOnNodeAtMousePosition(this.activeNode, mouseX, mouseY, (node) => {
                     if (this.ctrlClickHandler) {
                         this.ctrlClickHandler(node);
@@ -560,7 +560,7 @@ export class ProfileViewer {
         }
         this.tooltip.flags.innerText = flagString;
         if (this.ctrlClickHandler) {
-            this.tooltip['ctrlClickHint'].innerText = 'Ctrl+Click to open this file';
+            this.tooltip['ctrlClickHint'].innerText = 'Ctrl/Cmd+Click to open this file';
         }
     }
     drawHoverNode(node) {
