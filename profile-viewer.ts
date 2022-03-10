@@ -250,12 +250,25 @@ export class ProfileViewer {
       if (ev.deltaY > 0 && !this.canWheelDown) {
         return
       }
+
       if (ev.deltaY < 0 && this.scrollPosition === 0) {
-        return
+        if (-ev.deltaY > this.boxHeight) {
+          const parent = this.findParentNode(this.activeNode)
+          if (parent) {
+            ev.preventDefault()
+            ev.stopPropagation()
+
+            this.clearHover()
+            this.activeNode = parent
+            this.redraw()
+          }
+          return
+        }
       }
 
       ev.preventDefault()
       ev.stopPropagation()
+
       if (!this.isWheeling) {
         window.requestAnimationFrame(() => {
           this.scrollPosition = Math.min(0, this.scrollPosition - ev.deltaY)
@@ -840,5 +853,24 @@ export class ProfileViewer {
     })
 
     return found
+  }
+
+  // ideally this wouldn't require tree traversal at all
+  private findParentNode(target: ProfileNode, current: ProfileNode = null) {
+    if (current === null) {
+      current = this.data[this.currentThread]
+    }
+
+    for (const child of current.children) {
+      if (child === target) {
+        return current
+      } else {
+        const found = this.findParentNode(target, child)
+        if (found) {
+          return found
+        }
+      }
+    }
+    return null
   }
 }

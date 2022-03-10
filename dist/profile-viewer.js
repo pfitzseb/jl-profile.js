@@ -153,7 +153,17 @@ export class ProfileViewer {
                 return;
             }
             if (ev.deltaY < 0 && this.scrollPosition === 0) {
-                return;
+                if (-ev.deltaY > this.boxHeight) {
+                    const parent = this.findParentNode(this.activeNode);
+                    if (parent) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        this.clearHover();
+                        this.activeNode = parent;
+                        this.redraw();
+                    }
+                    return;
+                }
             }
             ev.preventDefault();
             ev.stopPropagation();
@@ -610,6 +620,24 @@ export class ProfileViewer {
             found = true;
         });
         return found;
+    }
+    // ideally this wouldn't require tree traversal at all
+    findParentNode(target, current = null) {
+        if (current === null) {
+            current = this.data[this.currentThread];
+        }
+        for (const child of current.children) {
+            if (child === target) {
+                return current;
+            }
+            else {
+                const found = this.findParentNode(target, child);
+                if (found) {
+                    return found;
+                }
+            }
+        }
+        return null;
     }
 }
 //# sourceMappingURL=profile-viewer.js.map
