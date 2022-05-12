@@ -507,7 +507,7 @@ export class ProfileViewer {
         };
         if (y + this.boxHeight <= this.canvasHeight) {
             for (const child of node.children) {
-                const w = width * (child.count / node.count);
+                const w = width * (child.fraction || child.count / node.count);
                 this.drawGraph(child, w, height, x, y + this.boxHeight);
                 x += w;
             }
@@ -547,10 +547,15 @@ export class ProfileViewer {
     }
     updateTooltip(node) {
         this.tooltip.function.innerText = node.func;
-        this.tooltip.file.innerText = node.file + ':' + node.line;
-        this.tooltip.count.innerText = node.count.toString();
+        if (node.file || node.line > 0) {
+            this.tooltip.file.innerText = node.file + ':' + node.line;
+        }
+        else {
+            this.tooltip.file.innerText = '';
+        }
+        this.tooltip.count.innerText = (node.countLabel || node.count).toString();
         this.tooltip.percentage.innerText = ((100 * node.count) /
-            this.activeNode.count).toFixed();
+            this.data[this.currentThread].count).toFixed();
         const flags = [];
         if (node.flags & 0x01) {
             flags.push('runtime-dispatch');

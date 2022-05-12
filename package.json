@@ -1,10 +1,9 @@
 {
   "name": "jl-profile",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Canvas-based flamegraph viewer for Julia code",
   "main": "dist/profile-viewer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc -p ./ && git add dist/*"
   },
   "repository": {

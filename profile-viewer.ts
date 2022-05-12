@@ -4,6 +4,8 @@ interface ProfileNode {
   path: string
   line: number
   count: number
+  fraction?: number // visual fraction of parent frame; defaults to `this.count/parent.count`
+  countLabel?: number | string // show this label instead of count; defaults to `count`
   flags: number
   pos?: {
     x: number
@@ -680,7 +682,7 @@ export class ProfileViewer {
 
     if (y + this.boxHeight <= this.canvasHeight) {
       for (const child of node.children) {
-        const w = width * (child.count / node.count)
+        const w = width * (child.fraction || child.count / node.count)
         this.drawGraph(child, w, height, x, y + this.boxHeight)
         x += w
       }
@@ -751,11 +753,16 @@ export class ProfileViewer {
 
   private updateTooltip(node: ProfileNode) {
     this.tooltip.function.innerText = node.func
-    this.tooltip.file.innerText = node.file + ':' + node.line
-    this.tooltip.count.innerText = node.count.toString()
+    if (node.file || node.line > 0) {
+      this.tooltip.file.innerText = node.file + ':' + node.line
+    } else {
+      this.tooltip.file.innerText = ''
+
+    }
+    this.tooltip.count.innerText = (node.countLabel || node.count).toString()
     this.tooltip.percentage.innerText = (
       (100 * node.count) /
-      this.activeNode.count
+      this.data[this.currentThread].count
     ).toFixed()
 
     const flags = []
