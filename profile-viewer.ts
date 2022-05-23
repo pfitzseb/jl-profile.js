@@ -26,8 +26,8 @@ interface TooltipElementContainer {
 
 export class ProfileViewer {
   private data: Record<string, ProfileNode>
-  private currentThread: string
-  private threads: string[] = []
+  private currentSelection: string
+  private selections: string[] = []
   private activeNode: ProfileNode
 
   private container: Element
@@ -67,14 +67,20 @@ export class ProfileViewer {
   private fontConfig = '10px sans-serif'
   private borderColor = '#fff'
 
+  private selectorLabel = 'Thread'
+
   private boxHeight = 24
 
   private ctrlClickHandler: (node: ProfileNode) => void
-  private threadSelectorHandler: (thread: string) => void
+  private selectionHandler: (selection: string) => void
 
   private destroyed = false
 
-  constructor(element: string | Element, data: Record<string, ProfileNode>) {
+  constructor(
+    element: string | Element,
+    data: Record<string, ProfileNode>,
+    selectorLabel: string
+  ) {
     if (typeof element === 'string') {
       element = document.querySelector(element)
     }
@@ -93,6 +99,10 @@ export class ProfileViewer {
 
     if (data) {
       this.setData(data)
+    }
+
+    if (selectorLabel) {
+      this.selectorLabel = selectorLabel
     }
 
     this.getOffset()
@@ -130,8 +140,8 @@ export class ProfileViewer {
       return
     }
 
-    const threads = Object.keys(data)
-    threads.sort((a, b) => {
+    const selections = Object.keys(data)
+    selections.sort((a, b) => {
       if (a === 'all') {
         return -1
       }
@@ -149,9 +159,9 @@ export class ProfileViewer {
 
     this.data = data
 
-    this.threads = threads
-    this.currentThread = this.threads[0]
-    this.activeNode = this.data[this.currentThread]
+    this.selections = selections
+    this.currentSelection = this.selections[0]
+    this.activeNode = this.data[this.currentSelection]
 
     this.updateFilter()
     this.redraw()
@@ -161,8 +171,15 @@ export class ProfileViewer {
     this.ctrlClickHandler = f
   }
 
-  registerThreadSelectorHandler(f: ((thread: string) => void) | undefined) {
-    this.threadSelectorHandler = f
+  /**
+   * @deprecated Use `registerSelectionHandler` instead.
+   */
+  registerThreadSelectorHandler(f: ((selection: string) => void) | undefined) {
+    this.selectionHandler = f
+  }
+
+  registerSelectionHandler(f: ((selection: string) => void) | undefined) {
+    this.selectionHandler = f
   }
 
   registerScrollListener() {
@@ -170,8 +187,8 @@ export class ProfileViewer {
   }
 
   clear() {
-    this.threads = []
-    this.currentThread = ''
+    this.selections = []
+    this.currentSelection = ''
     this.activeNode = undefined
 
     this.canvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
@@ -344,7 +361,7 @@ export class ProfileViewer {
       const mouseX = this.scale * (ev.clientX - this.offsetX)
       const mouseY = this.scale * (ev.clientY - this.offsetY)
 
-      if (ev.ctrlKey || ev.metaKey ) {
+      if (ev.ctrlKey || ev.metaKey) {
         this.runOnNodeAtMousePosition(
           this.activeNode,
           mouseX,
@@ -368,7 +385,7 @@ export class ProfileViewer {
   }
 
   private resetView() {
-    this.activeNode = this.data[this.currentThread]
+    this.activeNode = this.data[this.currentSelection]
     this.scrollPosition = 0
     this.redraw()
   }
@@ -484,15 +501,15 @@ export class ProfileViewer {
     this.filterContainer.classList.add('__profiler-filter')
 
     const info = document.createElement('label')
-    info.innerText = 'Thread: '
+    info.innerText = `${this.selectorLabel}: `
     this.filterContainer.appendChild(info)
 
     this.filterInput = document.createElement('select')
 
     this.filterInput.addEventListener('change', () => {
-      this.currentThread = this.filterInput.value
-      if (this.threadSelectorHandler) {
-        this.threadSelectorHandler(this.currentThread)
+      this.currentSelection = this.filterInput.value
+      if (this.selectionHandler) {
+        this.selectionHandler(this.currentSelection)
       }
       this.resetView()
     })
@@ -516,10 +533,10 @@ export class ProfileViewer {
       this.filterInput.removeChild(this.filterInput.lastChild)
     }
 
-    for (const thread of this.threads) {
+    for (const selection of this.selections) {
       const entry = document.createElement('option')
-      entry.innerText = thread
-      entry.setAttribute('value', thread)
+      entry.innerText = selection
+      entry.setAttribute('value', selection)
       this.filterInput.appendChild(entry)
     }
   }
@@ -757,12 +774,11 @@ export class ProfileViewer {
       this.tooltip.file.innerText = node.file + ':' + node.line
     } else {
       this.tooltip.file.innerText = ''
-
     }
     this.tooltip.count.innerText = (node.countLabel || node.count).toString()
     this.tooltip.percentage.innerText = (
       (100 * node.count) /
-      this.data[this.currentThread].count
+      this.data[this.currentSelection].count
     ).toFixed()
 
     const flags = []
@@ -786,7 +802,8 @@ export class ProfileViewer {
     this.tooltip.flags.innerText = flagString
 
     if (this.ctrlClickHandler) {
-      this.tooltip['ctrlClickHint'].innerText = 'Ctrl/Cmd+Click to open this file'
+      this.tooltip['ctrlClickHint'].innerText =
+        'Ctrl/Cmd+Click to open this file'
     }
   }
 
@@ -865,7 +882,7 @@ export class ProfileViewer {
   // ideally this wouldn't require tree traversal at all
   private findParentNode(target: ProfileNode, current: ProfileNode = null) {
     if (current === null) {
-      current = this.data[this.currentThread]
+      current = this.data[this.currentSelection]
     }
 
     for (const child of current.children) {

@@ -1,6 +1,6 @@
 export class ProfileViewer {
-    constructor(element, data) {
-        this.threads = [];
+    constructor(element, data, selectorLabel) {
+        this.selections = [];
         this.offsetX = 0;
         this.offsetY = 0;
         this.isWheeling = false;
@@ -14,6 +14,7 @@ export class ProfileViewer {
         this.padding = 2;
         this.fontConfig = '10px sans-serif';
         this.borderColor = '#fff';
+        this.selectorLabel = 'Thread';
         this.boxHeight = 24;
         this.destroyed = false;
         if (typeof element === 'string') {
@@ -29,6 +30,9 @@ export class ProfileViewer {
         this.registerScrollListener();
         if (data) {
             this.setData(data);
+        }
+        if (selectorLabel) {
+            this.selectorLabel = selectorLabel;
         }
         this.getOffset();
     }
@@ -60,8 +64,8 @@ export class ProfileViewer {
             this.clear();
             return;
         }
-        const threads = Object.keys(data);
-        threads.sort((a, b) => {
+        const selections = Object.keys(data);
+        selections.sort((a, b) => {
             if (a === 'all') {
                 return -1;
             }
@@ -77,24 +81,30 @@ export class ProfileViewer {
             return 0;
         });
         this.data = data;
-        this.threads = threads;
-        this.currentThread = this.threads[0];
-        this.activeNode = this.data[this.currentThread];
+        this.selections = selections;
+        this.currentSelection = this.selections[0];
+        this.activeNode = this.data[this.currentSelection];
         this.updateFilter();
         this.redraw();
     }
     registerCtrlClickHandler(f) {
         this.ctrlClickHandler = f;
     }
+    /**
+     * @deprecated Use `registerSelectionHandler` instead.
+     */
     registerThreadSelectorHandler(f) {
-        this.threadSelectorHandler = f;
+        this.selectionHandler = f;
+    }
+    registerSelectionHandler(f) {
+        this.selectionHandler = f;
     }
     registerScrollListener() {
         document.addEventListener('scroll', this.scrollHandler);
     }
     clear() {
-        this.threads = [];
-        this.currentThread = '';
+        this.selections = [];
+        this.currentSelection = '';
         this.activeNode = undefined;
         this.canvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
         this.hoverCanvasCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
@@ -243,7 +253,7 @@ export class ProfileViewer {
         });
     }
     resetView() {
-        this.activeNode = this.data[this.currentThread];
+        this.activeNode = this.data[this.currentSelection];
         this.scrollPosition = 0;
         this.redraw();
     }
@@ -344,13 +354,13 @@ export class ProfileViewer {
         this.filterContainer = document.createElement('div');
         this.filterContainer.classList.add('__profiler-filter');
         const info = document.createElement('label');
-        info.innerText = 'Thread: ';
+        info.innerText = `${this.selectorLabel}: `;
         this.filterContainer.appendChild(info);
         this.filterInput = document.createElement('select');
         this.filterInput.addEventListener('change', () => {
-            this.currentThread = this.filterInput.value;
-            if (this.threadSelectorHandler) {
-                this.threadSelectorHandler(this.currentThread);
+            this.currentSelection = this.filterInput.value;
+            if (this.selectionHandler) {
+                this.selectionHandler(this.currentSelection);
             }
             this.resetView();
         });
@@ -368,10 +378,10 @@ export class ProfileViewer {
         while (this.filterInput.firstChild) {
             this.filterInput.removeChild(this.filterInput.lastChild);
         }
-        for (const thread of this.threads) {
+        for (const selection of this.selections) {
             const entry = document.createElement('option');
-            entry.innerText = thread;
-            entry.setAttribute('value', thread);
+            entry.innerText = selection;
+            entry.setAttribute('value', selection);
             this.filterInput.appendChild(entry);
         }
     }
@@ -555,7 +565,7 @@ export class ProfileViewer {
         }
         this.tooltip.count.innerText = (node.countLabel || node.count).toString();
         this.tooltip.percentage.innerText = ((100 * node.count) /
-            this.data[this.currentThread].count).toFixed();
+            this.data[this.currentSelection].count).toFixed();
         const flags = [];
         if (node.flags & 0x01) {
             flags.push('runtime-dispatch');
@@ -575,7 +585,8 @@ export class ProfileViewer {
         }
         this.tooltip.flags.innerText = flagString;
         if (this.ctrlClickHandler) {
-            this.tooltip['ctrlClickHint'].innerText = 'Ctrl/Cmd+Click to open this file';
+            this.tooltip['ctrlClickHint'].innerText =
+                'Ctrl/Cmd+Click to open this file';
         }
     }
     drawHoverNode(node) {
@@ -629,7 +640,7 @@ export class ProfileViewer {
     // ideally this wouldn't require tree traversal at all
     findParentNode(target, current = null) {
         if (current === null) {
-            current = this.data[this.currentThread];
+            current = this.data[this.currentSelection];
         }
         for (const child of current.children) {
             if (child === target) {
