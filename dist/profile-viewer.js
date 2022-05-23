@@ -24,15 +24,15 @@ export class ProfileViewer {
             throw new Error('Invalid parent element specified.');
         }
         this.container = element;
+        if (selectorLabel) {
+            this.selectorLabel = selectorLabel;
+        }
         this.insertDOM();
         this.getStyles();
         this.registerResizeObserver();
         this.registerScrollListener();
         if (data) {
             this.setData(data);
-        }
-        if (selectorLabel) {
-            this.selectorLabel = selectorLabel;
         }
         this.getOffset();
     }
@@ -86,6 +86,10 @@ export class ProfileViewer {
         this.activeNode = this.data[this.currentSelection];
         this.updateFilter();
         this.redraw();
+    }
+    setSelectorLabel(label) {
+        this.selectorLabel = label;
+        this.selectorLabelElement.innerText = `${label}: `;
     }
     registerCtrlClickHandler(f) {
         this.ctrlClickHandler = f;
@@ -353,9 +357,9 @@ export class ProfileViewer {
     createFilterContainer() {
         this.filterContainer = document.createElement('div');
         this.filterContainer.classList.add('__profiler-filter');
-        const info = document.createElement('label');
-        info.innerText = `${this.selectorLabel}: `;
-        this.filterContainer.appendChild(info);
+        this.selectorLabelElement = document.createElement('label');
+        this.selectorLabelElement.innerText = `${this.selectorLabel}: `;
+        this.filterContainer.appendChild(this.selectorLabelElement);
         this.filterInput = document.createElement('select');
         this.filterInput.addEventListener('change', () => {
             this.currentSelection = this.filterInput.value;
