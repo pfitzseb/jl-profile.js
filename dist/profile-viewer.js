@@ -302,9 +302,6 @@ export class ProfileViewer {
                 .__profiler-tooltip > div {
                     line-break: anywhere;
                 }
-                .__profiler-tooltip .fname {
-                    margin-left: 0.5em;
-                }
                 .__profiler-filter {
                     height: 30px;
                     padding: 2px 16px;
@@ -332,12 +329,12 @@ export class ProfileViewer {
         };
         this.tooltip.function.classList.add('fname');
         const rows = [
+            [this.tooltip.function],
             [
                 this.tooltip.count,
                 document.createTextNode(' ('),
                 this.tooltip.percentage,
-                document.createTextNode('%) '),
-                this.tooltip.function,
+                document.createTextNode(') '),
             ],
             [this.tooltip.file],
             [this.tooltip.flags],
@@ -567,9 +564,14 @@ export class ProfileViewer {
         else {
             this.tooltip.file.innerText = '';
         }
-        this.tooltip.count.innerText = (node.countLabel || node.count).toString();
-        this.tooltip.percentage.innerText = ((100 * node.count) /
-            this.data[this.currentSelection].count).toFixed();
+        this.tooltip.count.innerText = (node.countLabel || (node.count + ' samples')).toString();
+        let percentageText = ((100 * node.count) /
+            this.data[this.currentSelection].count).toFixed() + '% of root';
+        if (this.activeNode.count != this.data[this.currentSelection].count) {
+            percentageText = percentageText + ', ' + ((100 * node.count) /
+                this.activeNode.count).toFixed() + '% of top';
+        }
+        this.tooltip.percentage.innerText = percentageText;
         const flags = [];
         if (node.flags & 0x01) {
             flags.push('runtime-dispatch');
