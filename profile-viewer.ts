@@ -788,7 +788,7 @@ export class ProfileViewer {
       percentageText = percentageText + ', ' + (
         (100 * node.count) /
         this.activeNode.count
-      ).toFixed() + '% of top'
+      ).toFixed() + '% of selection'
     }
 
     this.tooltip.percentage.innerText = percentageText

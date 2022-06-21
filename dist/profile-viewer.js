@@ -569,7 +569,7 @@ export class ProfileViewer {
             this.data[this.currentSelection].count).toFixed() + '% of root';
         if (this.activeNode.count != this.data[this.currentSelection].count) {
             percentageText = percentageText + ', ' + ((100 * node.count) /
-                this.activeNode.count).toFixed() + '% of top';
+                this.activeNode.count).toFixed() + '% of selection';
         }
         this.tooltip.percentage.innerText = percentageText;
         const flags = [];
