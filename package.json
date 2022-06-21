@@ -4,7 +4,8 @@
   "description": "Canvas-based flamegraph viewer for Julia code",
   "main": "dist/profile-viewer.js",
   "scripts": {
-    "compile": "tsc -p ./ && git add dist/*"
+    "minify": "uglifyjs dist/profile-viewer.js -o dist/profile-viewer.min.js -c -m --source-map \"content='dist/profile-viewer.js.map'\"",
+    "compile": "tsc -p ./ && npm run minify && git add dist/*"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,8 @@
   "homepage": "https://github.com/pfitzseb/jl-profile.js#readme",
   "devDependencies": {
     "pre-commit": "^1.2.2",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "uglify-js": "^3.16.1"
   },
   "pre-commit": [
     "compile"
