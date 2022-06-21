@@ -1,6 +1,6 @@
 {
   "name": "jl-profile",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Canvas-based flamegraph viewer for Julia code",
   "main": "dist/profile-viewer.js",
   "scripts": {
